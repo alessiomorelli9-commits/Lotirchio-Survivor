@@ -42,8 +42,24 @@
     .sound{width:58px;padding:0;background:#14253a;color:#fff;border:1px solid #344e69}
     .tips{font-size:12px;color:var(--muted);text-align:center;line-height:1.4}
     .photo-credit{font-size:10px;color:#8293a5;text-align:center}
+    .boost-panel{display:grid;gap:7px;background:rgba(15,29,46,.86);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+    .boost-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+    .boost-head strong{color:var(--text);font-size:13px}
+    .boost-track{height:9px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden}
+    .boost-fill{height:100%;width:0;background:linear-gradient(90deg,#f2c84b,#fff0a4);transition:width .18s linear}
+    .boost-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+    .boost-chip{border:1px solid #314a65;background:#102035;border-radius:11px;padding:7px 8px;min-width:0}
+    .boost-chip b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .boost-chip span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .boost-chip.done{border-color:#947822;background:rgba(106,83,13,.28)}
+    .boost-chip.active{border-color:#f2c84b;box-shadow:0 0 0 1px rgba(242,200,75,.22),0 0 22px rgba(242,200,75,.16)}
+    .boost-toast{position:absolute;left:50%;top:72px;transform:translate(-50%,-12px) scale(.96);opacity:0;pointer-events:none;z-index:4;min-width:min(420px,84%);padding:11px 15px;border-radius:14px;background:rgba(7,16,28,.93);border:1px solid rgba(255,226,127,.55);text-align:center;box-shadow:0 15px 50px rgba(0,0,0,.35);transition:opacity .2s ease,transform .2s ease}
+    .boost-toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+    .boost-toast b{display:block;color:#ffe27f;font-size:16px}.boost-toast span{font-size:11px;color:#c9d4e2}
+    .boost-timer{position:absolute;left:26px;right:26px;bottom:18px;height:10px;border-radius:999px;background:rgba(0,0,0,.34);overflow:hidden;z-index:2;opacity:0;transition:opacity .15s}
+    .boost-timer.show{opacity:1}.boost-timer>div{height:100%;width:0;background:linear-gradient(90deg,#ffe27f,#f2c84b)}
     @media(max-width:650px){
-      body{padding:8px}.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.brand p{font-size:12px}.stat strong{font-size:17px}.card{padding:17px}.controls{position:sticky;bottom:8px;z-index:5}.jump{min-height:62px}
+      body{padding:8px}.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.brand p{font-size:12px}.stat strong{font-size:17px}.card{padding:17px}.controls{position:sticky;bottom:8px;z-index:5}.jump{min-height:62px}.boost-list{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
   </style>
@@ -64,12 +80,25 @@
       <div class="stat"><span>Velocità</span><strong id="speed">1.00×</strong></div>
     </section>
 
+    <section class="boost-panel" aria-label="Obiettivi boost">
+      <div class="boost-head"><strong id="boostNext">Prossimo boost: Scudo del Senato</strong><span id="boostGoal">0 / 10 monete</span></div>
+      <div class="boost-track"><div class="boost-fill" id="boostFill"></div></div>
+      <div class="boost-list">
+        <div class="boost-chip" id="chipShield"><b>🛡 Scudo del Senato</b><span>10 monete</span></div>
+        <div class="boost-chip" id="chipMagnet"><b>🧲 Calamita Aurea</b><span>25 monete</span></div>
+        <div class="boost-chip" id="chipEagle"><b>🦅 Aquila Imperiale</b><span>1.500 punti</span></div>
+        <div class="boost-chip" id="chipFury"><b>⚡ Furia Capitolina</b><span>3.000 punti</span></div>
+      </div>
+    </section>
+
     <section class="stage">
       <canvas id="game" width="1280" height="720" aria-label="Senato Survivor"></canvas>
+      <div class="boost-toast" id="boostToast"><b id="boostToastTitle">BOOST!</b><span id="boostToastText"></span></div>
+      <div class="boost-timer" id="boostTimer"><div id="boostTimerFill"></div></div>
       <div class="overlay" id="overlay">
         <div class="card">
           <h2 id="overlayTitle">Senato Survivor</h2>
-          <p id="overlayText">Il protagonista corre automaticamente nel Training Center di Formello. Salta i villain, raccogli le monete “Senato della Repubblica” e resisti il più possibile.</p>
+          <p id="overlayText">Il protagonista corre automaticamente nel Training Center di Formello. Salta i villain, raccogli le monete “Senato della Repubblica” e resisti il più possibile. Raggiungendo determinati obiettivi si attivano automaticamente boost temporanei.</p>
           <p class="mini">PC: <b>SPAZIO</b> / <b>↑</b> / <b>W</b>. Smartphone: premi <b>SALTA</b> o tocca il campo. È disponibile il doppio salto.</p>
           <div class="actions">
             <button class="primary" id="startBtn">Inizia partita</button>
@@ -83,7 +112,7 @@
       <button class="jump" id="jumpBtn">⬆ SALTA</button>
       <button class="sound" id="soundBtn" aria-label="Attiva o disattiva audio">🔊</button>
     </div>
-    <div class="tips">Corsa automatica: parte già sostenuta, accelera gradualmente e si ferma a un limite massimo pensato per restare giocabile.</div>
+    <div class="tips">Corsa automatica invariata. Raggiungi gli obiettivi per sbloccare boost temporanei; ogni boost si attiva automaticamente una volta per partita.</div>
     <div class="photo-credit">Sfondo fotografico: Training Center di Formello. Fonte fotografica esterna indicata nei crediti del progetto.</div>
   </main>
 
@@ -112,6 +141,15 @@
     const coinsEl=document.getElementById('coins');
     const livesEl=document.getElementById('lives');
     const speedEl=document.getElementById('speed');
+    const boostNextEl=document.getElementById('boostNext');
+    const boostGoalEl=document.getElementById('boostGoal');
+    const boostFillEl=document.getElementById('boostFill');
+    const boostToast=document.getElementById('boostToast');
+    const boostToastTitle=document.getElementById('boostToastTitle');
+    const boostToastText=document.getElementById('boostToastText');
+    const boostTimer=document.getElementById('boostTimer');
+    const boostTimerFill=document.getElementById('boostTimerFill');
+    const boostChips={shield:document.getElementById('chipShield'),magnet:document.getElementById('chipMagnet'),eagle:document.getElementById('chipEagle'),fury:document.getElementById('chipFury')};
     const bgPhoto=document.getElementById('bgPhoto');
     const heroFrames=[1,2,3,4].map(n=>document.getElementById('hero'+n));
     const villainImgs=[1,2,3].map(n=>document.getElementById('villain'+n));
@@ -140,6 +178,15 @@
     let audioCtx=null;
     let lastTone=0;
     let best=Number(localStorage.getItem('senato-survivor-best')||0);
+    const BOOSTS={
+      shield:{name:'Scudo del Senato',duration:8,desc:'Invulnerabile: i villain vengono respinti.',metric:'coins',goal:10},
+      magnet:{name:'Calamita Aurea',duration:10,desc:'Le monete vicine vengono attirate verso di te.',metric:'coins',goal:25},
+      eagle:{name:'Aquila Imperiale',duration:7,desc:'Volo assistito sopra i villain.',metric:'score',goal:1500},
+      fury:{name:'Furia Capitolina',duration:7,desc:'Punteggio x2 e villain eliminati al contatto.',metric:'score',goal:3000}
+    };
+    const boostOrder=['shield','magnet','eagle','fury'];
+    let activeBoost=null,boostTime=0,boostMax=0,toastTimer=0;
+    let unlocked={shield:false,magnet:false,eagle:false,fury:false};
 
     const player={x:165,y:0,w:126,h:170,vy:0,grounded:true,doubleJump:true,invuln:0,frameClock:0,prevBottom:0};
     player.y=GROUND-player.h;
@@ -151,11 +198,47 @@
       coinsEl.textContent=coinCount;
       livesEl.textContent=lives;
       speedEl.textContent=speedRatio().toFixed(2)+'×';
+      updateBoostHud();
+    }
+
+    function metricValue(b){return b.metric==='coins'?coinCount:score}
+    function updateBoostHud(){
+      for(const key of boostOrder){
+        boostChips[key].classList.toggle('done',unlocked[key]);
+        boostChips[key].classList.toggle('active',activeBoost===key);
+      }
+      const nextKey=boostOrder.find(k=>!unlocked[k]);
+      if(!nextKey){boostNextEl.textContent='Tutti i boost sbloccati';boostGoalEl.textContent='Obiettivi completati';boostFillEl.style.width='100%'}
+      else{
+        const b=BOOSTS[nextKey],v=metricValue(b);
+        boostNextEl.textContent='Prossimo boost: '+b.name;
+        boostGoalEl.textContent=Math.min(v,b.goal)+' / '+b.goal+(b.metric==='coins'?' monete':' punti');
+        boostFillEl.style.width=(Math.max(0,Math.min(1,v/b.goal))*100).toFixed(1)+'%';
+      }
+      if(activeBoost){
+        boostTimer.classList.add('show');
+        boostTimerFill.style.width=(Math.max(0,Math.min(1,boostTime/boostMax))*100).toFixed(1)+'%';
+      }else{boostTimer.classList.remove('show')}
+    }
+
+    function showBoostToast(title,text){
+      boostToastTitle.textContent=title;boostToastText.textContent=text;boostToast.classList.add('show');toastTimer=2.2;
+    }
+    function activateBoost(key){
+      if(unlocked[key])return;
+      unlocked[key]=true;activeBoost=key;boostTime=BOOSTS[key].duration;boostMax=boostTime;
+      showBoostToast('BOOST: '+BOOSTS[key].name,BOOSTS[key].desc);
+      burst(player.x+player.w*.55,player.y+player.h*.4,'#ffe27f',20);tone(980,.12,.04,'sine');setTimeout(()=>tone(1240,.12,.03,'sine'),90);
+    }
+    function checkBoostUnlocks(){
+      if(activeBoost)return;
+      for(const key of boostOrder){const b=BOOSTS[key];if(!unlocked[key]&&metricValue(b)>=b.goal){activateBoost(key);break}}
     }
 
     function reset(){
       runTime=0;score=0;coinCount=0;lives=3;scroll=0;enemyTimer=1.75;coinTimer=.95;
       enemies=[];coins=[];particles=[];
+      activeBoost=null;boostTime=0;boostMax=0;toastTimer=0;unlocked={shield:false,magnet:false,eagle:false,fury:false};boostToast.classList.remove('show');boostTimer.classList.remove('show');
       player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true;player.invuln=0;player.frameClock=0;player.prevBottom=player.y+player.h;
       hud();
     }
@@ -229,22 +312,38 @@
     function update(dt){
       if(state!=='playing')return;
       runTime+=dt;
+      if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)boostToast.classList.remove('show')}
+      if(activeBoost){boostTime-=dt;if(boostTime<=0){showBoostToast(BOOSTS[activeBoost].name+' terminato','Continua la corsa e punta al prossimo obiettivo.');activeBoost=null;boostTime=0;boostMax=0}}
       const ws=speed();
       scroll+=ws*dt;
       player.invuln=Math.max(0,player.invuln-dt);
       player.prevBottom=player.y+player.h;
       player.frameClock+=dt;
 
-      player.vy+=GRAVITY*dt;
-      player.y+=player.vy*dt;
-      if(player.y>=GROUND-player.h){player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true}
+      if(activeBoost==='eagle'){
+        const targetY=GROUND-player.h-175+Math.sin(runTime*4)*24;
+        player.vy+=(targetY-player.y)*7.8*dt;
+        player.vy*=Math.pow(.075,dt);
+        player.y+=player.vy*dt;
+        player.grounded=false;player.doubleJump=true;
+      }else{
+        player.vy+=GRAVITY*dt;
+        player.y+=player.vy*dt;
+        if(player.y>=GROUND-player.h){player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true}
+      }
 
       enemyTimer-=dt;coinTimer-=dt;
       if(enemyTimer<=0){spawnEnemy();enemyTimer=Math.max(.88,1.56-runTime*.0065)+Math.random()*.34}
       if(coinTimer<=0){spawnCoinPattern();coinTimer=1.05+Math.random()*.9}
 
       for(const e of enemies){e.x-=ws*dt;e.bob+=dt*7}
-      for(const c of coins){c.x-=ws*dt;c.spin+=dt*7}
+      for(const c of coins){
+        c.x-=ws*dt;c.spin+=dt*7;
+        if(activeBoost==='magnet'){
+          const dx=(player.x+player.w*.55)-c.x,dy=(player.y+player.h*.45)-c.y,dist=Math.hypot(dx,dy);
+          if(dist<360&&dist>1){const pull=(420+(360-dist)*2.4)*dt;c.x+=dx/dist*pull;c.y+=dy/dist*pull}
+        }
+      }
 
       // Smaller hit boxes than the artwork, preventing unfair visual contacts.
       const pb={x:player.x+37,y:player.y+29,w:player.w-70,h:player.h-42};
@@ -260,6 +359,13 @@
         const wasClearlyAbove=player.prevBottom-8<=enemyTop+15;
         const falling=player.vy>105;
         const stillAbove=pFeet<enemyTop+20;
+
+        if(activeBoost==='fury'){
+          e.dead=true;score+=220;burst(e.x+e.w*.5,e.y+45,'#ffe27f',18);tone(145,.07,.04,'square');continue;
+        }
+        if(activeBoost==='shield'){
+          e.dead=true;score+=80;burst(e.x+e.w*.5,e.y+45,'#7fe7ff',14);tone(260,.05,.03,'square');continue;
+        }
 
         // Stomp only when the player crosses the villain's top while falling.
         if(falling&&wasClearlyAbove){
@@ -278,14 +384,16 @@
       for(const c of coins){
         if(!c.active)continue;
         const cb={x:c.x-c.r,y:c.y-c.r,w:c.r*2,h:c.r*2};const ov=overlap(pb,cb);
-        if(ov.x>3&&ov.y>3){c.active=false;coinCount++;score+=35;burst(c.x,c.y,'#f2c84b',9);tone(820,.05,.025,'sine')}
+        if(ov.x>3&&ov.y>3){c.active=false;coinCount++;score+=activeBoost==='fury'?70:35;burst(c.x,c.y,'#f2c84b',9);tone(820,.05,.025,'sine')}
       }
 
       enemies=enemies.filter(e=>!e.dead&&e.x+e.w>-130);
       coins=coins.filter(c=>c.active&&c.x>-60);
       for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=420*dt}
       particles=particles.filter(p=>p.life>0);
-      score=Math.max(score,Math.floor(runTime*13+coinCount*35));
+      const baseRunScore=Math.floor(runTime*13+coinCount*35);
+      if(activeBoost==='fury')score=Math.max(score,baseRunScore+Math.floor(runTime*13));else score=Math.max(score,baseRunScore);
+      checkBoostUnlocks();
       hud();
     }
 
@@ -335,6 +443,10 @@
     function drawPlayer(){
       ctx.save();
       if(player.invuln>0&&Math.floor(player.invuln*13)%2===0)ctx.globalAlpha=.42;
+      if(activeBoost){
+        const auraColor=activeBoost==='shield'?'rgba(110,225,255,.34)':activeBoost==='magnet'?'rgba(242,200,75,.28)':activeBoost==='eagle'?'rgba(255,255,255,.27)':'rgba(255,192,63,.34)';
+        ctx.fillStyle=auraColor;ctx.beginPath();ctx.ellipse(player.x+player.w*.52,player.y+player.h*.5,player.w*.62,player.h*.62,0,0,Math.PI*2);ctx.fill();
+      }
       const shadowScale=player.grounded?1:Math.max(.55,1-(GROUND-(player.y+player.h))/330);
       ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(player.x+player.w*.48,GROUND+7,43*shadowScale,11*shadowScale,0,0,Math.PI*2);ctx.fill();
       const frame=player.grounded?Math.floor(player.frameClock*10)%4:(player.vy<0?1:2);
@@ -347,11 +459,19 @@
     }
 
     function drawParticles(){for(const p of particles){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)}ctx.globalAlpha=1}
+    function drawBoostFx(){
+      if(!activeBoost)return;
+      ctx.save();
+      if(activeBoost==='eagle'){ctx.strokeStyle='rgba(255,255,255,.50)';ctx.lineWidth=4;for(let i=0;i<5;i++){const y=player.y+35+i*24;ctx.beginPath();ctx.moveTo(player.x-20-(i*12),y);ctx.lineTo(player.x-80-(i*18),y);ctx.stroke()}}
+      if(activeBoost==='fury'){ctx.strokeStyle='rgba(255,215,90,.45)';ctx.lineWidth=3;for(let i=0;i<7;i++){const y=(i*103+runTime*180)%H;ctx.beginPath();ctx.moveTo(W-200,y);ctx.lineTo(W,y-24);ctx.stroke()}}
+      if(activeBoost==='magnet'){ctx.strokeStyle='rgba(242,200,75,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(player.x+player.w*.5,player.y+player.h*.45,115+Math.sin(runTime*5)*8,0,Math.PI*2);ctx.stroke()}
+      ctx.restore();
+    }
     function drawSpeedLine(){
       const pct=(speed()-START_SPEED)/(MAX_SPEED-START_SPEED);
       ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(26,24,250,30);ctx.fillStyle='#fff';ctx.font='700 13px system-ui';ctx.fillText('VELOCITÀ',38,44);ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(111,33,150,10);ctx.fillStyle='#f2c84b';ctx.fillRect(111,33,150*Math.max(0,Math.min(1,pct)),10);
     }
-    function render(){drawBackground();coins.forEach(drawCoin);enemies.forEach(drawVillain);drawPlayer();drawParticles();drawSpeedLine()}
+    function render(){drawBackground();coins.forEach(drawCoin);enemies.forEach(drawVillain);drawBoostFx();drawPlayer();drawParticles();drawSpeedLine()}
 
     function loop(now){
       if(!last)last=now;const dt=Math.min(.032,(now-last)/1000);last=now;
