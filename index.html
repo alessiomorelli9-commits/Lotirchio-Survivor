@@ -43,6 +43,15 @@
     button{font:inherit;font-weight:800;border:0;border-radius:13px;min-height:46px;padding:0 18px;cursor:pointer}
     .primary{background:linear-gradient(#ffe27f,#f2c84b);color:#29200a}
     .secondary{background:#1a2b40;color:#fff;border:1px solid #35506b}
+    .install-app{background:linear-gradient(#8fe3b7,#55d89c);color:#082317;border:0}
+    .install-app[hidden]{display:none!important}
+    .install-sheet{position:fixed;inset:0;z-index:120;display:none;align-items:flex-end;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:rgba(3,8,15,.74);backdrop-filter:blur(8px)}
+    .install-sheet.show{display:flex}
+    .install-card{width:min(520px,100%);background:#0d1b2b;border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:18px;box-shadow:0 24px 80px rgba(0,0,0,.55)}
+    .install-card h3{margin:0 0 8px;font-size:22px}.install-card p{margin:7px 0;color:var(--muted);line-height:1.45;font-size:14px}
+    .install-steps{margin:10px 0 0;padding-left:21px;color:#e9f1f8;line-height:1.55;font-size:14px}
+    .install-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+    .install-note{font-size:11px!important;color:#8798a9!important}
     .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.7fr) auto auto;gap:8px}
     .jump{min-height:58px;font-size:18px;background:linear-gradient(#ffe27f,#eab431);color:#261c05}.shoot{min-height:58px;font-size:16px;background:linear-gradient(#f7f7f7,#cfd7df);color:#102035}.shoot:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(1)}
     .sound{width:58px;padding:0;background:#14253a;color:#fff;border:1px solid #344e69}
@@ -126,6 +135,7 @@
         <h1>SENATO SURVIVOR</h1>
         <p>Survival runner • PC / iPhone / Android • nessun account necessario</p>
       </div>
+      <button class="install-app" data-install hidden>⬇ Installa app</button>
     </header>
 
     <section class="hud" aria-label="Statistiche">
@@ -161,6 +171,7 @@
           <div class="actions">
             <button class="primary" id="startBtn">Inizia partita</button>
             <button class="secondary" id="pauseBtn" disabled>Pausa</button>
+            <button class="install-app" data-install hidden>⬇ Installa app</button>
           </div>
         </div>
       </div>
@@ -175,7 +186,18 @@
     <div class="tips">Modalità Survivor continua: la difficoltà sale da FACILE a ESTREMO. I boost sono riutilizzabili, cumulabili e si ricaricano dopo l’uso. Tastiera: 1–5 per attivarli; A / ⚽ TIRA con Parametro Zero.</div>
     <div class="photo-credit">Sfondo fotografico: Training Center di Formello. Fonte fotografica esterna indicata nei crediti del progetto.</div>
   </main>
-  <div class="rotate-hint" id="rotateHint"><div><b>↻ Ruota il telefono</b><span>Senato Survivor è ottimizzato per giocare a schermo intero in orizzontale.</span></div></div>
+  <div class="rotate-hint" id="rotateHint"><div><b>↻ Ruota il telefono</b><span>Senato Survivor è ottimizzato per giocare a schermo intero in orizzontale.</span><div style="margin-top:16px"><button class="install-app" data-install hidden>⬇ Installa app</button></div></div></div>
+  <div class="install-sheet" id="installSheet" aria-hidden="true">
+    <div class="install-card">
+      <h3 id="installTitle">Installa Senato Survivor</h3>
+      <p id="installIntro">Puoi aggiungere il gioco alla schermata Home e aprirlo come un’app.</p>
+      <ol class="install-steps" id="installSteps"></ol>
+      <p class="install-note" id="installNote"></p>
+      <div class="install-actions">
+        <button class="secondary" id="installCloseBtn">Chiudi</button>
+      </div>
+    </div>
+  </div>
 
   <img id="bgPhoto" alt="" hidden src="https://slyvi-tstorage.fra1.digitaloceanspaces.com/l49210605768_tml1493224634113_64622974165_1752067011865666.jpg">
   <img id="hero1" alt="" hidden src="hero-run-1.png">
@@ -200,6 +222,14 @@
     const shootBtn=document.getElementById('shootBtn');
     const soundBtn=document.getElementById('soundBtn');
     const fullscreenBtn=document.getElementById('fullscreenBtn');
+    const installButtons=[...document.querySelectorAll('[data-install]')];
+    const installSheet=document.getElementById('installSheet');
+    const installTitle=document.getElementById('installTitle');
+    const installIntro=document.getElementById('installIntro');
+    const installSteps=document.getElementById('installSteps');
+    const installNote=document.getElementById('installNote');
+    const installCloseBtn=document.getElementById('installCloseBtn');
+    let deferredInstallPrompt=null;
     const scoreEl=document.getElementById('score');
     const coinsEl=document.getElementById('coins');
     const livesEl=document.getElementById('lives');
@@ -479,6 +509,39 @@
         }
       }catch(e){document.body.classList.toggle('immersive')}
       syncImmersive();
+    }
+    function isStandaloneApp(){
+      return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+    }
+    function isIOSDevice(){
+      return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    }
+    function updateInstallUI(){
+      const installed=isStandaloneApp();
+      const ios=isIOSDevice();
+      const mobile=isMobileLike();
+      for(const btn of installButtons) btn.hidden=installed||(!mobile&&!deferredInstallPrompt);
+    }
+    function showInstallGuide(kind){
+      installSteps.innerHTML='';
+      const items=kind==='ios'
+        ? ['Apri questa pagina in Safari.','Tocca il pulsante Condividi di Safari.','Scorri e scegli “Aggiungi alla schermata Home”.','Conferma con “Aggiungi”, poi apri Senato Survivor dalla nuova icona.']
+        : ['Apri il menu del browser.','Scegli “Installa app” oppure “Aggiungi alla schermata Home”.','Conferma l’installazione e apri il gioco dalla nuova icona.'];
+      for(const item of items){const li=document.createElement('li');li.textContent=item;installSteps.appendChild(li)}
+      installTitle.textContent='Installa Senato Survivor';
+      installIntro.textContent=kind==='ios'?'Su iPhone l’installazione si completa dal menu Condividi di Safari.':'Il browser può aggiungere Senato Survivor alla schermata Home.';
+      installNote.textContent='Dopo l’installazione il gioco usa il layout fullscreen/landscape già ottimizzato.';
+      installSheet.classList.add('show');installSheet.setAttribute('aria-hidden','false');
+    }
+    function hideInstallGuide(){installSheet.classList.remove('show');installSheet.setAttribute('aria-hidden','true')}
+    async function installApp(){
+      if(isStandaloneApp()){updateInstallUI();return}
+      if(deferredInstallPrompt){
+        const p=deferredInstallPrompt;deferredInstallPrompt=null;
+        try{await p.prompt();await p.userChoice}catch(e){}
+        updateInstallUI();return;
+      }
+      showInstallGuide(isIOSDevice()?'ios':'generic');
     }
 
     function spawnEnemy(xOffset=0,scale=1){
@@ -761,6 +824,11 @@
     startBtn.addEventListener('click',()=>{if(state==='paused')togglePause();else startGame()});
     pauseBtn.addEventListener('click',togglePause);
     fullscreenBtn.addEventListener('click',toggleFullscreen);
+    installButtons.forEach(btn=>btn.addEventListener('click',installApp));
+    installCloseBtn.addEventListener('click',hideInstallGuide);
+    installSheet.addEventListener('click',e=>{if(e.target===installSheet)hideInstallGuide()});
+    window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;updateInstallUI()});
+    window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;hideInstallGuide();updateInstallUI()});
     soundBtn.addEventListener('click',toggleSound);
     for(const key of boostOrder){
       boostChips[key].addEventListener('click',()=>activateBoost(key));
@@ -774,7 +842,7 @@
 
     Promise.all([...heroFrames,...villainImgs].map(i=>i.decode?.().catch(()=>{})||Promise.resolve())).then(render);
     bgPhoto.addEventListener('load',render);bgPhoto.addEventListener('error',render);
-    syncImmersive();hud();render();requestAnimationFrame(loop);
+    syncImmersive();updateInstallUI();hud();render();requestAnimationFrame(loop);
 
     if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   })();
