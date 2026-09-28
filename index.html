@@ -2,12 +2,18 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Senato Survivor">
+  <meta name="screen-orientation" content="landscape">
   <meta name="theme-color" content="#0d1727">
   <meta name="description" content="Senato Survivor - mini gioco web arcade per PC e smartphone.">
   <title>Senato Survivor</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root{
       color-scheme:dark;
@@ -15,8 +21,8 @@
       --text:#f5f7fb;--muted:#aab9ca;--gold:#f2c84b;--danger:#ff625f;--ok:#55d89c;
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -15%,#223d65 0,#07111d 48%,#040a12 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{display:flex;justify-content:center;padding:14px;overscroll-behavior:none}
+    html,body{margin:0;width:100%;min-height:100%;background:radial-gradient(circle at 50% -15%,#223d65 0,#07111d 48%,#040a12 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{display:flex;justify-content:center;padding:14px;overscroll-behavior:none;overflow-x:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
     .app{width:min(1120px,100%);display:grid;gap:10px;align-content:start}
     .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .brand h1{font-size:clamp(26px,5vw,42px);line-height:1;margin:0;letter-spacing:-.04em}
@@ -37,9 +43,10 @@
     button{font:inherit;font-weight:800;border:0;border-radius:13px;min-height:46px;padding:0 18px;cursor:pointer}
     .primary{background:linear-gradient(#ffe27f,#f2c84b);color:#29200a}
     .secondary{background:#1a2b40;color:#fff;border:1px solid #35506b}
-    .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.7fr) auto;gap:8px}
+    .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.7fr) auto auto;gap:8px}
     .jump{min-height:58px;font-size:18px;background:linear-gradient(#ffe27f,#eab431);color:#261c05}.shoot{min-height:58px;font-size:16px;background:linear-gradient(#f7f7f7,#cfd7df);color:#102035}.shoot:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(1)}
     .sound{width:58px;padding:0;background:#14253a;color:#fff;border:1px solid #344e69}
+    .fullscreen{width:58px;padding:0;background:#14253a;color:#fff;border:1px solid #344e69}
     .tips{font-size:12px;color:var(--muted);text-align:center;line-height:1.4}
     .photo-credit{font-size:10px;color:#8293a5;text-align:center}
     .boost-panel{display:grid;gap:7px;background:rgba(15,29,46,.86);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
@@ -60,6 +67,52 @@
     .boost-timer.show{opacity:1}.boost-timer>div{height:100%;width:0;background:linear-gradient(90deg,#ffe27f,#f2c84b)}
     .level-banner{display:flex;justify-content:space-between;gap:8px;align-items:center;background:rgba(15,29,46,.86);border:1px solid var(--line);border-radius:13px;padding:8px 11px;font-size:12px}
     .level-banner strong{font-size:14px}.level-track{flex:1;max-width:440px;height:9px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden}.level-fill{height:100%;background:linear-gradient(90deg,#55d89c,#ffe27f);width:0}
+    .rotate-hint{display:none;position:fixed;inset:0;z-index:100;background:#07111d;align-items:center;justify-content:center;text-align:center;padding:28px}
+    .rotate-hint>div{max-width:360px}.rotate-hint b{display:block;font-size:28px;margin-bottom:10px}.rotate-hint span{color:var(--muted);font-size:14px}
+    body.immersive{padding:0;overflow:hidden;background:#000}
+    body.immersive .app{width:100vw;height:100dvh;max-width:none;display:block;position:relative;overflow:hidden}
+    body.immersive .top,body.immersive .tips,body.immersive .photo-credit{display:none}
+    body.immersive .stage{position:fixed;inset:0;border:0;border-radius:0;background:#000;box-shadow:none;z-index:1}
+    body.immersive canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,calc(100dvh * 16 / 9));height:min(100dvh,calc(100vw * 9 / 16));max-width:none;max-height:none;aspect-ratio:16/9}
+    body.immersive .hud{position:fixed;z-index:10;top:max(6px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));display:grid;grid-template-columns:repeat(4,62px);gap:4px}
+    body.immersive .stat{padding:5px 6px;border-radius:9px;background:rgba(6,16,28,.72);backdrop-filter:blur(7px)}
+    body.immersive .stat span{font-size:8px;letter-spacing:.04em}
+    body.immersive .stat strong{font-size:14px;margin-top:0}
+    body.immersive .level-banner{position:fixed;z-index:10;top:max(7px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(32vw,285px);padding:5px 8px;border-radius:9px;background:rgba(6,16,28,.72);backdrop-filter:blur(7px)}
+    body.immersive .level-banner strong{font-size:10px;white-space:nowrap}
+    body.immersive .level-banner span{font-size:8px;white-space:nowrap}
+    body.immersive .level-track{height:5px}
+    body.immersive .boost-panel{position:fixed;z-index:10;left:50%;bottom:max(7px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(56vw,570px);padding:5px 6px;gap:3px;border-radius:10px;background:rgba(6,16,28,.76);backdrop-filter:blur(8px)}
+    body.immersive .boost-head,body.immersive .boost-panel>.boost-track{display:none}
+    body.immersive .boost-list{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+    body.immersive .boost-chip{padding:4px 4px;border-radius:7px;text-align:center}
+    body.immersive .boost-chip b{font-size:8px}
+    body.immersive .boost-chip span{font-size:7px;margin-top:1px}
+    body.immersive .charge-track{height:3px;margin-top:3px}
+    body.immersive .controls{position:fixed;inset:0;z-index:11;display:block;pointer-events:none}
+    body.immersive .controls button{pointer-events:auto;position:fixed;margin:0}
+    body.immersive .jump{left:max(9px,env(safe-area-inset-left));bottom:max(9px,env(safe-area-inset-bottom));width:min(18vw,150px);min-height:58px;font-size:15px;opacity:.94}
+    body.immersive .shoot{right:max(9px,env(safe-area-inset-right));bottom:max(9px,env(safe-area-inset-bottom));width:min(18vw,150px);min-height:58px;font-size:13px;opacity:.94}
+    body.immersive .sound{right:max(56px,calc(env(safe-area-inset-right) + 56px));top:max(7px,env(safe-area-inset-top));width:42px;min-height:38px;border-radius:9px}
+    body.immersive .fullscreen{right:max(8px,env(safe-area-inset-right));top:max(7px,env(safe-area-inset-top));width:42px;min-height:38px;border-radius:9px}
+    body.immersive .boost-toast{top:max(52px,calc(env(safe-area-inset-top) + 45px));min-width:min(380px,56%);padding:8px 12px}
+    body.immersive .boost-toast b{font-size:13px}
+    body.immersive .boost-toast span{font-size:9px}
+    body.immersive .boost-timer{left:25%;right:25%;bottom:72px;height:6px}
+    body.immersive .overlay{padding:max(12px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+    body.immersive .card{width:min(520px,72vw);padding:14px 18px}
+    body.immersive .card h2{font-size:26px}
+    body.immersive .card p{font-size:12px;margin:6px 0}
+    body.immersive .card .mini{font-size:10px}
+    body.immersive .actions{margin-top:8px}
+    body.immersive .actions button{min-height:40px}
+    @media (pointer:coarse) and (orientation:landscape){
+      body{padding:0;overflow:hidden;background:#000}
+      .app{width:100vw;height:100dvh;max-width:none}
+    }
+    @media (pointer:coarse) and (orientation:portrait) and (max-width:900px){
+      .rotate-hint{display:flex}
+    }
     @media(max-width:650px){
       body{padding:8px}.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.brand p{font-size:12px}.stat strong{font-size:17px}.card{padding:17px}.controls{position:sticky;bottom:8px;z-index:5}.jump{min-height:62px}.boost-list{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
@@ -117,10 +170,12 @@
       <button class="jump" id="jumpBtn">⬆ SALTA</button>
       <button class="shoot" id="shootBtn" disabled>⚽ TIRA (A)</button>
       <button class="sound" id="soundBtn" aria-label="Attiva o disattiva audio">🔊</button>
+      <button class="fullscreen" id="fullscreenBtn" aria-label="Schermo intero">⛶</button>
     </div>
     <div class="tips">Modalità Survivor continua: la difficoltà sale da FACILE a ESTREMO. I boost sono riutilizzabili, cumulabili e si ricaricano dopo l’uso. Tastiera: 1–5 per attivarli; A / ⚽ TIRA con Parametro Zero.</div>
     <div class="photo-credit">Sfondo fotografico: Training Center di Formello. Fonte fotografica esterna indicata nei crediti del progetto.</div>
   </main>
+  <div class="rotate-hint" id="rotateHint"><div><b>↻ Ruota il telefono</b><span>Senato Survivor è ottimizzato per giocare a schermo intero in orizzontale.</span></div></div>
 
   <img id="bgPhoto" alt="" hidden src="https://slyvi-tstorage.fra1.digitaloceanspaces.com/l49210605768_tml1493224634113_64622974165_1752067011865666.jpg">
   <img id="hero1" alt="" hidden src="hero-run-1.png">
@@ -144,6 +199,7 @@
     const jumpBtn=document.getElementById('jumpBtn');
     const shootBtn=document.getElementById('shootBtn');
     const soundBtn=document.getElementById('soundBtn');
+    const fullscreenBtn=document.getElementById('fullscreenBtn');
     const scoreEl=document.getElementById('score');
     const coinsEl=document.getElementById('coins');
     const livesEl=document.getElementById('lives');
@@ -404,6 +460,26 @@
       lastTone=now;const seq=[196,247,262,294,330,294,262,247];const n=seq[Math.floor(runTime*2.7)%seq.length];tone(n,.12,.012,'triangle');
     }
     function toggleSound(){audioEnabled=!audioEnabled;soundBtn.textContent=audioEnabled?'🔊':'🔇';if(audioEnabled)ensureAudio()}
+    function isMobileLike(){return matchMedia('(pointer:coarse)').matches||Math.min(innerWidth,innerHeight)<700}
+    function syncImmersive(){
+      const landscape=innerWidth>innerHeight;
+      const should=isMobileLike()&&landscape;
+      document.body.classList.toggle('immersive',should||!!document.fullscreenElement);
+      setTimeout(render,60);
+    }
+    async function toggleFullscreen(){
+      try{
+        if(!document.fullscreenElement&&document.documentElement.requestFullscreen){
+          await document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>document.documentElement.requestFullscreen());
+          if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{});
+        }else if(document.fullscreenElement&&document.exitFullscreen){
+          await document.exitFullscreen();
+        }else{
+          document.body.classList.toggle('immersive');
+        }
+      }catch(e){document.body.classList.toggle('immersive')}
+      syncImmersive();
+    }
 
     function spawnEnemy(xOffset=0,scale=1){
       const type=Math.floor(Math.random()*3);
@@ -684,6 +760,7 @@
     shootBtn.addEventListener('pointerdown',e=>{e.preventDefault();shootBall()},{passive:false});
     startBtn.addEventListener('click',()=>{if(state==='paused')togglePause();else startGame()});
     pauseBtn.addEventListener('click',togglePause);
+    fullscreenBtn.addEventListener('click',toggleFullscreen);
     soundBtn.addEventListener('click',toggleSound);
     for(const key of boostOrder){
       boostChips[key].addEventListener('click',()=>activateBoost(key));
@@ -691,10 +768,13 @@
       boostChips[key].tabIndex=0;
     }
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')togglePause()});
+    document.addEventListener('fullscreenchange',syncImmersive);
+    window.addEventListener('resize',syncImmersive,{passive:true});
+    window.addEventListener('orientationchange',()=>setTimeout(syncImmersive,120),{passive:true});
 
     Promise.all([...heroFrames,...villainImgs].map(i=>i.decode?.().catch(()=>{})||Promise.resolve())).then(render);
     bgPhoto.addEventListener('load',render);bgPhoto.addEventListener('error',render);
-    hud();render();requestAnimationFrame(loop);
+    syncImmersive();hud();render();requestAnimationFrame(loop);
 
     if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   })();
