@@ -23,5 +23,12 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "Survival runner arcade ottimizzato per smartphone e desktop.",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "lang": "it-IT",
+  "dir": "ltr"
 }
