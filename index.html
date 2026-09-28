@@ -48,16 +48,18 @@
     .boost-track{height:9px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden}
     .boost-fill{height:100%;width:0;background:linear-gradient(90deg,#f2c84b,#fff0a4);transition:width .18s linear}
     .boost-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
-    .boost-chip{border:1px solid #314a65;background:#102035;border-radius:11px;padding:7px 8px;min-width:0}
+    .boost-chip{border:1px solid #314a65;background:#102035;border-radius:11px;padding:7px 8px;min-width:0;cursor:pointer;user-select:none;transition:.15s transform,.15s opacity}.boost-chip:active{transform:scale(.97)}
     .boost-chip b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .boost-chip span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-    .boost-chip.done{border-color:#947822;background:rgba(106,83,13,.28)}
+    .boost-chip.done{border-color:#947822;background:rgba(106,83,13,.28)}.boost-chip.locked{opacity:.55;cursor:not-allowed}.boost-chip.ready{border-color:#55d89c;box-shadow:0 0 0 1px rgba(85,216,156,.18)}
     .boost-chip.active{border-color:#f2c84b;box-shadow:0 0 0 1px rgba(242,200,75,.22),0 0 22px rgba(242,200,75,.16)}
     .boost-toast{position:absolute;left:50%;top:72px;transform:translate(-50%,-12px) scale(.96);opacity:0;pointer-events:none;z-index:4;min-width:min(420px,84%);padding:11px 15px;border-radius:14px;background:rgba(7,16,28,.93);border:1px solid rgba(255,226,127,.55);text-align:center;box-shadow:0 15px 50px rgba(0,0,0,.35);transition:opacity .2s ease,transform .2s ease}
     .boost-toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
     .boost-toast b{display:block;color:#ffe27f;font-size:16px}.boost-toast span{font-size:11px;color:#c9d4e2}
     .boost-timer{position:absolute;left:26px;right:26px;bottom:18px;height:10px;border-radius:999px;background:rgba(0,0,0,.34);overflow:hidden;z-index:2;opacity:0;transition:opacity .15s}
     .boost-timer.show{opacity:1}.boost-timer>div{height:100%;width:0;background:linear-gradient(90deg,#ffe27f,#f2c84b)}
+    .level-banner{display:flex;justify-content:space-between;gap:8px;align-items:center;background:rgba(15,29,46,.86);border:1px solid var(--line);border-radius:13px;padding:8px 11px;font-size:12px}
+    .level-banner strong{font-size:14px}.level-track{flex:1;max-width:440px;height:9px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden}.level-fill{height:100%;background:linear-gradient(90deg,#55d89c,#ffe27f);width:0}
     @media(max-width:650px){
       body{padding:8px}.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.brand p{font-size:12px}.stat strong{font-size:17px}.card{padding:17px}.controls{position:sticky;bottom:8px;z-index:5}.jump{min-height:62px}.boost-list{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
@@ -80,14 +82,16 @@
       <div class="stat"><span>Velocità</span><strong id="speed">1.00×</strong></div>
     </section>
 
+    <section class="level-banner"><strong id="levelLabel">Livello 1 / 5</strong><div class="level-track"><div class="level-fill" id="levelFill"></div></div><span id="levelGoal">0 / 800 punti</span></section>
+
     <section class="boost-panel" aria-label="Obiettivi boost">
       <div class="boost-head"><strong id="boostNext">Prossimo boost: Scudo del Senato</strong><span id="boostGoal">0 / 10 monete</span></div>
       <div class="boost-track"><div class="boost-fill" id="boostFill"></div></div>
       <div class="boost-list">
-        <div class="boost-chip" id="chipShield"><b>🛡 Scudo del Senato</b><span>10 monete</span></div>
-        <div class="boost-chip" id="chipMagnet"><b>🧲 Calamita Aurea</b><span>25 monete</span></div>
-        <div class="boost-chip" id="chipEagle"><b>🦅 Aquila Imperiale</b><span>1.500 punti</span></div>
-        <div class="boost-chip" id="chipFury"><b>⚡ Furia Capitolina</b><span>3.000 punti</span></div>
+        <div class="boost-chip locked" id="chipShield" role="button"><b>🛡 Scudo del Senato</b><span>🔒 10 monete</span></div>
+        <div class="boost-chip locked" id="chipMagnet" role="button"><b>🧲 Calamita Aurea</b><span>🔒 25 monete</span></div>
+        <div class="boost-chip locked" id="chipEagle" role="button"><b>🦅 Aquila Imperiale</b><span>🔒 1.500 punti</span></div>
+        <div class="boost-chip locked" id="chipFury" role="button"><b>⚡ Furia Capitolina</b><span>🔒 3.000 punti</span></div>
       </div>
     </section>
 
@@ -98,7 +102,7 @@
       <div class="overlay" id="overlay">
         <div class="card">
           <h2 id="overlayTitle">Senato Survivor</h2>
-          <p id="overlayText">Il protagonista corre automaticamente nel Training Center di Formello. Salta i villain, raccogli le monete “Senato della Repubblica” e resisti il più possibile. Raggiungendo determinati obiettivi si attivano automaticamente boost temporanei.</p>
+          <p id="overlayText">Il protagonista corre automaticamente nel Training Center di Formello. Salta i villain, raccogli le monete “Senato della Repubblica” e completa tutti e 5 i livelli. Raggiungi gli obiettivi per sbloccare i boost, poi scegli tu quando attivarli.</p>
           <p class="mini">PC: <b>SPAZIO</b> / <b>↑</b> / <b>W</b>. Smartphone: premi <b>SALTA</b> o tocca il campo. È disponibile il doppio salto.</p>
           <div class="actions">
             <button class="primary" id="startBtn">Inizia partita</button>
@@ -112,7 +116,7 @@
       <button class="jump" id="jumpBtn">⬆ SALTA</button>
       <button class="sound" id="soundBtn" aria-label="Attiva o disattiva audio">🔊</button>
     </div>
-    <div class="tips">Corsa automatica invariata. Raggiungi gli obiettivi per sbloccare boost temporanei; ogni boost si attiva automaticamente una volta per partita.</div>
+    <div class="tips">Corsa automatica invariata. I boost sbloccati si attivano toccandoli e possono funzionare contemporaneamente. Supera 5 livelli per completare la partita.</div>
     <div class="photo-credit">Sfondo fotografico: Training Center di Formello. Fonte fotografica esterna indicata nei crediti del progetto.</div>
   </main>
 
@@ -141,6 +145,9 @@
     const coinsEl=document.getElementById('coins');
     const livesEl=document.getElementById('lives');
     const speedEl=document.getElementById('speed');
+    const levelLabel=document.getElementById('levelLabel');
+    const levelFill=document.getElementById('levelFill');
+    const levelGoal=document.getElementById('levelGoal');
     const boostNextEl=document.getElementById('boostNext');
     const boostGoalEl=document.getElementById('boostGoal');
     const boostFillEl=document.getElementById('boostFill');
@@ -185,13 +192,23 @@
       fury:{name:'Furia Capitolina',duration:7,desc:'Punteggio x2 e villain eliminati al contatto.',metric:'score',goal:3000}
     };
     const boostOrder=['shield','magnet','eagle','fury'];
-    let activeBoost=null,boostTime=0,boostMax=0,toastTimer=0;
+    const LEVELS=[
+      {name:'Ingresso a Formello',goal:800},
+      {name:'Campo Centrale',goal:1800},
+      {name:'Assedio Biancoceleste',goal:3200},
+      {name:'Corsa Capitolina',goal:5000},
+      {name:'Ultima Resistenza',goal:7500}
+    ];
+    let currentLevel=0;
+    let activeTimers={shield:0,magnet:0,eagle:0,fury:0};
+    let used={shield:false,magnet:false,eagle:false,fury:false};
+    let toastTimer=0;
     let unlocked={shield:false,magnet:false,eagle:false,fury:false};
 
     const player={x:165,y:0,w:126,h:170,vy:0,grounded:true,doubleJump:true,invuln:0,frameClock:0,prevBottom:0};
     player.y=GROUND-player.h;
 
-    function speed(){return Math.min(MAX_SPEED,START_SPEED+runTime*ACCEL_PER_SEC)}
+    function speed(){return Math.min(MAX_SPEED,START_SPEED+runTime*ACCEL_PER_SEC+currentLevel*8)}
     function speedRatio(){return speed()/START_SPEED}
     function hud(){
       scoreEl.textContent=score;
@@ -202,43 +219,70 @@
     }
 
     function metricValue(b){return b.metric==='coins'?coinCount:score}
+    function isBoostActive(key){return activeTimers[key]>0}
+    function updateLevelHud(){
+      const lev=LEVELS[currentLevel]||LEVELS[LEVELS.length-1];
+      const prev=currentLevel===0?0:LEVELS[currentLevel-1].goal;
+      const span=Math.max(1,lev.goal-prev),done=Math.max(0,Math.min(span,score-prev));
+      levelLabel.textContent='Livello '+(currentLevel+1)+' / '+LEVELS.length+' — '+lev.name;
+      levelGoal.textContent=Math.min(score,lev.goal)+' / '+lev.goal+' punti';
+      levelFill.style.width=(done/span*100).toFixed(1)+'%';
+    }
     function updateBoostHud(){
       for(const key of boostOrder){
-        boostChips[key].classList.toggle('done',unlocked[key]);
-        boostChips[key].classList.toggle('active',activeBoost===key);
+        const chip=boostChips[key],b=BOOSTS[key],span=chip.querySelector('span');
+        const active=isBoostActive(key);
+        chip.classList.toggle('done',unlocked[key]);
+        chip.classList.toggle('active',active);
+        chip.classList.toggle('ready',unlocked[key]&&!used[key]&&!active);
+        chip.classList.toggle('locked',!unlocked[key]);
+        if(active) span.textContent=activeTimers[key].toFixed(1)+'s';
+        else if(used[key]) span.textContent='USATO';
+        else if(unlocked[key]) span.textContent='▶ ATTIVA';
+        else span.textContent='🔒 '+b.goal+(b.metric==='coins'?' monete':' punti');
       }
       const nextKey=boostOrder.find(k=>!unlocked[k]);
-      if(!nextKey){boostNextEl.textContent='Tutti i boost sbloccati';boostGoalEl.textContent='Obiettivi completati';boostFillEl.style.width='100%'}
+      if(!nextKey){boostNextEl.textContent='Tutti i boost sbloccati';boostGoalEl.textContent='Scegli tu quando usarli';boostFillEl.style.width='100%'}
       else{
         const b=BOOSTS[nextKey],v=metricValue(b);
         boostNextEl.textContent='Prossimo boost: '+b.name;
         boostGoalEl.textContent=Math.min(v,b.goal)+' / '+b.goal+(b.metric==='coins'?' monete':' punti');
         boostFillEl.style.width=(Math.max(0,Math.min(1,v/b.goal))*100).toFixed(1)+'%';
       }
-      if(activeBoost){
+      const activeKeys=boostOrder.filter(isBoostActive);
+      if(activeKeys.length){
         boostTimer.classList.add('show');
-        boostTimerFill.style.width=(Math.max(0,Math.min(1,boostTime/boostMax))*100).toFixed(1)+'%';
-      }else{boostTimer.classList.remove('show')}
+        const pct=Math.max(...activeKeys.map(k=>activeTimers[k]/BOOSTS[k].duration));
+        boostTimerFill.style.width=(Math.max(0,Math.min(1,pct))*100).toFixed(1)+'%';
+      }else boostTimer.classList.remove('show');
+      updateLevelHud();
     }
 
     function showBoostToast(title,text){
       boostToastTitle.textContent=title;boostToastText.textContent=text;boostToast.classList.add('show');toastTimer=2.2;
     }
     function activateBoost(key){
-      if(unlocked[key])return;
-      unlocked[key]=true;activeBoost=key;boostTime=BOOSTS[key].duration;boostMax=boostTime;
-      showBoostToast('BOOST: '+BOOSTS[key].name,BOOSTS[key].desc);
+      if(state!=='playing'||!unlocked[key]||used[key]||isBoostActive(key))return;
+      used[key]=true;activeTimers[key]=BOOSTS[key].duration;
+      showBoostToast('BOOST ATTIVATO: '+BOOSTS[key].name,BOOSTS[key].desc);
       burst(player.x+player.w*.55,player.y+player.h*.4,'#ffe27f',20);tone(980,.12,.04,'sine');setTimeout(()=>tone(1240,.12,.03,'sine'),90);
+      hud();
     }
     function checkBoostUnlocks(){
-      if(activeBoost)return;
-      for(const key of boostOrder){const b=BOOSTS[key];if(!unlocked[key]&&metricValue(b)>=b.goal){activateBoost(key);break}}
+      for(const key of boostOrder){
+        const b=BOOSTS[key];
+        if(!unlocked[key]&&metricValue(b)>=b.goal){
+          unlocked[key]=true;
+          showBoostToast('SBLOCCATO: '+b.name,'Tocca il boost quando vuoi usarlo.');
+          tone(980,.10,.03,'sine');
+        }
+      }
     }
 
     function reset(){
       runTime=0;score=0;coinCount=0;lives=3;scroll=0;enemyTimer=1.75;coinTimer=.95;
       enemies=[];coins=[];particles=[];
-      activeBoost=null;boostTime=0;boostMax=0;toastTimer=0;unlocked={shield:false,magnet:false,eagle:false,fury:false};boostToast.classList.remove('show');boostTimer.classList.remove('show');
+      currentLevel=0;activeTimers={shield:0,magnet:0,eagle:0,fury:0};used={shield:false,magnet:false,eagle:false,fury:false};toastTimer=0;unlocked={shield:false,magnet:false,eagle:false,fury:false};boostToast.classList.remove('show');boostTimer.classList.remove('show');
       player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true;player.invuln=0;player.frameClock=0;player.prevBottom=player.y+player.h;
       hud();
     }
@@ -262,6 +306,27 @@
       overlay.classList.remove('hidden');
     }
 
+    function checkLevel(){
+      if(state!=='playing'||score<LEVELS[currentLevel].goal)return;
+      if(currentLevel>=LEVELS.length-1){winGame();return}
+      state='levelcomplete';pauseBtn.disabled=true;
+      overlayTitle.textContent='Livello '+(currentLevel+1)+' completato!';
+      overlayText.textContent='Hai superato '+LEVELS[currentLevel].name+'. Punteggio: '+score+'. I boost attivi restano congelati durante la pausa.';
+      startBtn.textContent='Continua';
+      overlay.classList.remove('hidden');
+    }
+    function nextLevel(){
+      currentLevel++;enemies=[];coins=[];enemyTimer=1.15;coinTimer=.75;
+      state='playing';pauseBtn.disabled=false;pauseBtn.textContent='Pausa';overlay.classList.add('hidden');last=performance.now();hud();
+    }
+    function winGame(){
+      state='victory';pauseBtn.disabled=true;
+      if(score>best){best=score;localStorage.setItem('senato-survivor-best',String(best))}
+      overlayTitle.textContent='🏆 Vittoria!';
+      overlayText.textContent='Hai completato tutti e 5 i livelli di Senato Survivor con '+score+' punti e '+coinCount+' monete. Record: '+best+'.';
+      startBtn.textContent='Gioca di nuovo';overlay.classList.remove('hidden');
+    }
+
     function togglePause(){
       if(state==='playing'){
         state='paused';pauseBtn.textContent='Riprendi';
@@ -275,7 +340,7 @@
     }
 
     function jump(){
-      if(state==='menu'||state==='gameover') return;
+      if(state==='menu'||state==='gameover'||state==='levelcomplete'||state==='victory') return;
       if(state==='paused'){togglePause();return}
       if(player.grounded){player.vy=JUMP_V;player.grounded=false;tone(520,.06,.035)}
       else if(player.doubleJump){player.vy=DOUBLE_JUMP_V;player.doubleJump=false;tone(690,.055,.03)}
@@ -313,14 +378,19 @@
       if(state!=='playing')return;
       runTime+=dt;
       if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)boostToast.classList.remove('show')}
-      if(activeBoost){boostTime-=dt;if(boostTime<=0){showBoostToast(BOOSTS[activeBoost].name+' terminato','Continua la corsa e punta al prossimo obiettivo.');activeBoost=null;boostTime=0;boostMax=0}}
+      for(const key of boostOrder){
+        if(activeTimers[key]>0){
+          activeTimers[key]=Math.max(0,activeTimers[key]-dt);
+          if(activeTimers[key]===0)showBoostToast(BOOSTS[key].name+' terminato','Gli altri boost attivi continuano normalmente.');
+        }
+      }
       const ws=speed();
       scroll+=ws*dt;
       player.invuln=Math.max(0,player.invuln-dt);
       player.prevBottom=player.y+player.h;
       player.frameClock+=dt;
 
-      if(activeBoost==='eagle'){
+      if(isBoostActive('eagle')){
         const targetY=GROUND-player.h-175+Math.sin(runTime*4)*24;
         player.vy+=(targetY-player.y)*7.8*dt;
         player.vy*=Math.pow(.075,dt);
@@ -333,13 +403,13 @@
       }
 
       enemyTimer-=dt;coinTimer-=dt;
-      if(enemyTimer<=0){spawnEnemy();enemyTimer=Math.max(.88,1.56-runTime*.0065)+Math.random()*.34}
+      if(enemyTimer<=0){spawnEnemy();enemyTimer=Math.max(.72,1.56-runTime*.0065-currentLevel*.08)+Math.random()*.34}
       if(coinTimer<=0){spawnCoinPattern();coinTimer=1.05+Math.random()*.9}
 
       for(const e of enemies){e.x-=ws*dt;e.bob+=dt*7}
       for(const c of coins){
         c.x-=ws*dt;c.spin+=dt*7;
-        if(activeBoost==='magnet'){
+        if(isBoostActive('magnet')){
           const dx=(player.x+player.w*.55)-c.x,dy=(player.y+player.h*.45)-c.y,dist=Math.hypot(dx,dy);
           if(dist<360&&dist>1){const pull=(420+(360-dist)*2.4)*dt;c.x+=dx/dist*pull;c.y+=dy/dist*pull}
         }
@@ -360,10 +430,10 @@
         const falling=player.vy>105;
         const stillAbove=pFeet<enemyTop+20;
 
-        if(activeBoost==='fury'){
+        if(isBoostActive('fury')){
           e.dead=true;score+=220;burst(e.x+e.w*.5,e.y+45,'#ffe27f',18);tone(145,.07,.04,'square');continue;
         }
-        if(activeBoost==='shield'){
+        if(isBoostActive('shield')){
           e.dead=true;score+=80;burst(e.x+e.w*.5,e.y+45,'#7fe7ff',14);tone(260,.05,.03,'square');continue;
         }
 
@@ -384,7 +454,7 @@
       for(const c of coins){
         if(!c.active)continue;
         const cb={x:c.x-c.r,y:c.y-c.r,w:c.r*2,h:c.r*2};const ov=overlap(pb,cb);
-        if(ov.x>3&&ov.y>3){c.active=false;coinCount++;score+=activeBoost==='fury'?70:35;burst(c.x,c.y,'#f2c84b',9);tone(820,.05,.025,'sine')}
+        if(ov.x>3&&ov.y>3){c.active=false;coinCount++;score+=isBoostActive('fury')?70:35;burst(c.x,c.y,'#f2c84b',9);tone(820,.05,.025,'sine')}
       }
 
       enemies=enemies.filter(e=>!e.dead&&e.x+e.w>-130);
@@ -392,8 +462,8 @@
       for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=420*dt}
       particles=particles.filter(p=>p.life>0);
       const baseRunScore=Math.floor(runTime*13+coinCount*35);
-      if(activeBoost==='fury')score=Math.max(score,baseRunScore+Math.floor(runTime*13));else score=Math.max(score,baseRunScore);
-      checkBoostUnlocks();
+      if(isBoostActive('fury'))score=Math.max(score,baseRunScore+Math.floor(runTime*13));else score=Math.max(score,baseRunScore);
+      checkBoostUnlocks();checkLevel();
       hud();
     }
 
@@ -443,8 +513,8 @@
     function drawPlayer(){
       ctx.save();
       if(player.invuln>0&&Math.floor(player.invuln*13)%2===0)ctx.globalAlpha=.42;
-      if(activeBoost){
-        const auraColor=activeBoost==='shield'?'rgba(110,225,255,.34)':activeBoost==='magnet'?'rgba(242,200,75,.28)':activeBoost==='eagle'?'rgba(255,255,255,.27)':'rgba(255,192,63,.34)';
+      if(boostOrder.some(isBoostActive)){
+        const auraColor=isBoostActive('shield')?'rgba(110,225,255,.34)':isBoostActive('magnet')?'rgba(242,200,75,.28)':isBoostActive('eagle')?'rgba(255,255,255,.27)':'rgba(255,192,63,.34)';
         ctx.fillStyle=auraColor;ctx.beginPath();ctx.ellipse(player.x+player.w*.52,player.y+player.h*.5,player.w*.62,player.h*.62,0,0,Math.PI*2);ctx.fill();
       }
       const shadowScale=player.grounded?1:Math.max(.55,1-(GROUND-(player.y+player.h))/330);
@@ -460,11 +530,11 @@
 
     function drawParticles(){for(const p of particles){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)}ctx.globalAlpha=1}
     function drawBoostFx(){
-      if(!activeBoost)return;
+      if(!boostOrder.some(isBoostActive))return;
       ctx.save();
-      if(activeBoost==='eagle'){ctx.strokeStyle='rgba(255,255,255,.50)';ctx.lineWidth=4;for(let i=0;i<5;i++){const y=player.y+35+i*24;ctx.beginPath();ctx.moveTo(player.x-20-(i*12),y);ctx.lineTo(player.x-80-(i*18),y);ctx.stroke()}}
-      if(activeBoost==='fury'){ctx.strokeStyle='rgba(255,215,90,.45)';ctx.lineWidth=3;for(let i=0;i<7;i++){const y=(i*103+runTime*180)%H;ctx.beginPath();ctx.moveTo(W-200,y);ctx.lineTo(W,y-24);ctx.stroke()}}
-      if(activeBoost==='magnet'){ctx.strokeStyle='rgba(242,200,75,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(player.x+player.w*.5,player.y+player.h*.45,115+Math.sin(runTime*5)*8,0,Math.PI*2);ctx.stroke()}
+      if(isBoostActive('eagle')){ctx.strokeStyle='rgba(255,255,255,.50)';ctx.lineWidth=4;for(let i=0;i<5;i++){const y=player.y+35+i*24;ctx.beginPath();ctx.moveTo(player.x-20-(i*12),y);ctx.lineTo(player.x-80-(i*18),y);ctx.stroke()}}
+      if(isBoostActive('fury')){ctx.strokeStyle='rgba(255,215,90,.45)';ctx.lineWidth=3;for(let i=0;i<7;i++){const y=(i*103+runTime*180)%H;ctx.beginPath();ctx.moveTo(W-200,y);ctx.lineTo(W,y-24);ctx.stroke()}}
+      if(isBoostActive('magnet')){ctx.strokeStyle='rgba(242,200,75,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(player.x+player.w*.5,player.y+player.h*.45,115+Math.sin(runTime*5)*8,0,Math.PI*2);ctx.stroke()}
       ctx.restore();
     }
     function drawSpeedLine(){
@@ -485,9 +555,14 @@
     window.addEventListener('keydown',keydown,{passive:false});
     canvas.addEventListener('pointerdown',e=>{e.preventDefault();jump()},{passive:false});
     jumpBtn.addEventListener('pointerdown',e=>{e.preventDefault();jump()},{passive:false});
-    startBtn.addEventListener('click',()=>{if(state==='paused')togglePause();else startGame()});
+    startBtn.addEventListener('click',()=>{if(state==='paused')togglePause();else if(state==='levelcomplete')nextLevel();else startGame()});
     pauseBtn.addEventListener('click',togglePause);
     soundBtn.addEventListener('click',toggleSound);
+    for(const key of boostOrder){
+      boostChips[key].addEventListener('click',()=>activateBoost(key));
+      boostChips[key].addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateBoost(key)}});
+      boostChips[key].tabIndex=0;
+    }
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')togglePause()});
 
     Promise.all([...heroFrames,...villainImgs].map(i=>i.decode?.().catch(()=>{})||Promise.resolve())).then(render);
