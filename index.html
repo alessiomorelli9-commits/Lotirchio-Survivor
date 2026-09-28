@@ -50,7 +50,7 @@
     .boost-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
     .boost-chip{border:1px solid #314a65;background:#102035;border-radius:11px;padding:7px 8px;min-width:0;cursor:pointer;user-select:none;transition:.15s transform,.15s opacity}.boost-chip:active{transform:scale(.97)}
     .boost-chip b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .boost-chip span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .boost-chip span{display:block;color:var(--muted);font-size:10px;margin-top:2px}.charge-track{display:block;height:5px;margin-top:6px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden}.charge-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,#4f6b86,#8fa8bf);transition:width .12s linear}.boost-chip.ready .charge-fill{background:linear-gradient(90deg,#55d89c,#a7f1cf)}.boost-chip.active .charge-fill{background:linear-gradient(90deg,#ffe27f,#f2c84b)}.boost-chip.charging{border-color:#50677e}
     .boost-chip.done{border-color:#947822;background:rgba(106,83,13,.28)}.boost-chip.locked{opacity:.55;cursor:not-allowed}.boost-chip.ready{border-color:#55d89c;box-shadow:0 0 0 1px rgba(85,216,156,.18)}
     .boost-chip.active{border-color:#f2c84b;box-shadow:0 0 0 1px rgba(242,200,75,.22),0 0 22px rgba(242,200,75,.16)}
     .boost-toast{position:absolute;left:50%;top:72px;transform:translate(-50%,-12px) scale(.96);opacity:0;pointer-events:none;z-index:4;min-width:min(420px,84%);padding:11px 15px;border-radius:14px;background:rgba(7,16,28,.93);border:1px solid rgba(255,226,127,.55);text-align:center;box-shadow:0 15px 50px rgba(0,0,0,.35);transition:opacity .2s ease,transform .2s ease}
@@ -88,11 +88,11 @@
       <div class="boost-head"><strong id="boostNext">Prossimo boost: Scudo del Senato</strong><span id="boostGoal">0 / 10 monete</span></div>
       <div class="boost-track"><div class="boost-fill" id="boostFill"></div></div>
       <div class="boost-list">
-        <div class="boost-chip locked" id="chipShield" role="button"><b>🛡 Scudo del Senato</b><span>🔒 10 monete</span></div>
-        <div class="boost-chip locked" id="chipMagnet" role="button"><b>🧲 Calamita Aurea</b><span>🔒 25 monete</span></div>
-        <div class="boost-chip locked" id="chipEagle" role="button"><b>🦅 Aquila Imperiale</b><span>🔒 1.500 punti</span></div>
-        <div class="boost-chip locked" id="chipFury" role="button"><b>⚡ Furia Capitolina</b><span>🔒 3.000 punti</span></div>
-        <div class="boost-chip locked" id="chipZero" role="button"><b>⚽ Parametro Zero</b><span>🔒 4.500 punti</span></div>
+        <div class="boost-chip locked" id="chipShield" role="button"><b>[1] 🛡 Scudo del Senato</b><span>🔒 10 monete</span><i class="charge-track"><i class="charge-fill"></i></i></div>
+        <div class="boost-chip locked" id="chipMagnet" role="button"><b>[2] 🧲 Calamita Aurea</b><span>🔒 25 monete</span><i class="charge-track"><i class="charge-fill"></i></i></div>
+        <div class="boost-chip locked" id="chipEagle" role="button"><b>[3] 🦅 Aquila Imperiale</b><span>🔒 1.500 punti</span><i class="charge-track"><i class="charge-fill"></i></i></div>
+        <div class="boost-chip locked" id="chipFury" role="button"><b>[4] ⚡ Furia Capitolina</b><span>🔒 3.000 punti</span><i class="charge-track"><i class="charge-fill"></i></i></div>
+        <div class="boost-chip locked" id="chipZero" role="button"><b>[5] ⚽ Parametro Zero</b><span>🔒 4.500 punti</span><i class="charge-track"><i class="charge-fill"></i></i></div>
       </div>
     </section>
 
@@ -104,7 +104,7 @@
         <div class="card">
           <h2 id="overlayTitle">Senato Survivor</h2>
           <p id="overlayText">Modalità Survivor: corri il più a lungo possibile. La difficoltà cresce lentamente da FACILE fino a ESTREMO. Salta i villain, raccogli le monete “Senato della Repubblica” e sblocca i boost da attivare quando vuoi.</p>
-          <p class="mini">PC: <b>SPAZIO</b> / <b>↑</b> / <b>W</b> per saltare. Con <b>Parametro Zero</b> attivo premi <b>A</b> per tirare. Smartphone: usa <b>SALTA</b> e <b>⚽ TIRA</b>.</p>
+          <p class="mini">PC: <b>SPAZIO</b> / <b>↑</b> / <b>W</b> per saltare. Boost: <b>1–5</b>. Con <b>Parametro Zero</b> attivo premi <b>A</b> per tirare. Smartphone: tocca il boost, usa <b>SALTA</b> e <b>⚽ TIRA</b>.</p>
           <div class="actions">
             <button class="primary" id="startBtn">Inizia partita</button>
             <button class="secondary" id="pauseBtn" disabled>Pausa</button>
@@ -118,7 +118,7 @@
       <button class="shoot" id="shootBtn" disabled>⚽ TIRA (A)</button>
       <button class="sound" id="soundBtn" aria-label="Attiva o disattiva audio">🔊</button>
     </div>
-    <div class="tips">Modalità Survivor continua: la difficoltà sale progressivamente da FACILE a ESTREMO. I boost sono manuali e cumulabili. Parametro Zero abilita il tiro con A / ⚽ TIRA.</div>
+    <div class="tips">Modalità Survivor continua: la difficoltà sale da FACILE a ESTREMO. I boost sono riutilizzabili, cumulabili e si ricaricano dopo l’uso. Tastiera: 1–5 per attivarli; A / ⚽ TIRA con Parametro Zero.</div>
     <div class="photo-credit">Sfondo fotografico: Training Center di Formello. Fonte fotografica esterna indicata nei crediti del progetto.</div>
   </main>
 
@@ -194,11 +194,11 @@
     let lastTone=0;
     let best=Number(localStorage.getItem('senato-survivor-best')||0);
     const BOOSTS={
-      shield:{name:'Scudo del Senato',duration:8,desc:'Invulnerabile: i villain vengono respinti.',metric:'coins',goal:10},
-      magnet:{name:'Calamita Aurea',duration:10,desc:'Le monete vicine vengono attirate verso di te.',metric:'coins',goal:25},
-      eagle:{name:'Aquila Imperiale',duration:7,desc:'Volo assistito sopra i villain.',metric:'score',goal:1500},
-      fury:{name:'Furia Capitolina',duration:7,desc:'Punteggio x2 e villain eliminati al contatto.',metric:'score',goal:3000},
-      zero:{name:'Parametro Zero',duration:15,desc:'Per 15 secondi premi A o ⚽ TIRA per lanciare palloni.',metric:'score',goal:4500}
+      shield:{name:'Scudo del Senato',duration:8,recharge:18,key:'1',desc:'Invulnerabile: i villain vengono respinti.',metric:'coins',goal:10},
+      magnet:{name:'Calamita Aurea',duration:10,recharge:20,key:'2',desc:'Le monete vicine vengono attirate verso di te.',metric:'coins',goal:25},
+      eagle:{name:'Aquila Imperiale',duration:7,recharge:24,key:'3',desc:'Volo assistito sopra i villain.',metric:'score',goal:1500},
+      fury:{name:'Furia Capitolina',duration:7,recharge:28,key:'4',desc:'Punteggio x2 e villain eliminati al contatto.',metric:'score',goal:3000},
+      zero:{name:'Parametro Zero',duration:15,recharge:32,key:'5',desc:'Per 15 secondi premi A o ⚽ TIRA per lanciare palloni.',metric:'score',goal:4500}
     };
     const boostOrder=['shield','magnet','eagle','fury','zero'];
     const DIFFICULTY=[
@@ -209,8 +209,9 @@
       {name:'ESTREMO',start:460,speed:500,spawnBase:.67,minGap:.44,pair:.62,triple:.44,quad:.17,sizeMin:.84,sizeMax:1.20,spacing:178,restEvery:7,restBonus:.16}
     ];
     let activeTimers={shield:0,magnet:0,eagle:0,fury:0,zero:0};
-    let used={shield:false,magnet:false,eagle:false,fury:false,zero:false};
+    let rechargeTimers={shield:0,magnet:0,eagle:0,fury:0,zero:0};
     let toastTimer=0;
+    let toastQueue=[];
     let unlocked={shield:false,magnet:false,eagle:false,fury:false,zero:false};
 
     const player={x:165,y:0,w:126,h:170,vy:0,grounded:true,doubleJump:true,invuln:0,frameClock:0,prevBottom:0};
@@ -261,21 +262,36 @@
         levelFill.style.width='100%';
       }
     }
+    function isBoostReady(key){return unlocked[key]&&!isBoostActive(key)&&rechargeTimers[key]<=0}
     function updateBoostHud(){
       for(const key of boostOrder){
-        const chip=boostChips[key],b=BOOSTS[key],span=chip.querySelector('span');
-        const active=isBoostActive(key);
+        const chip=boostChips[key],b=BOOSTS[key],span=chip.querySelector('span'),fill=chip.querySelector('.charge-fill');
+        const active=isBoostActive(key),ready=isBoostReady(key),charging=unlocked[key]&&!active&&!ready;
         chip.classList.toggle('done',unlocked[key]);
         chip.classList.toggle('active',active);
-        chip.classList.toggle('ready',unlocked[key]&&!used[key]&&!active);
+        chip.classList.toggle('ready',ready);
+        chip.classList.toggle('charging',charging);
         chip.classList.toggle('locked',!unlocked[key]);
-        if(active) span.textContent=activeTimers[key].toFixed(1)+'s';
-        else if(used[key]) span.textContent='USATO';
-        else if(unlocked[key]) span.textContent='▶ ATTIVA';
-        else span.textContent='🔒 '+b.goal+(b.metric==='coins'?' monete':' punti');
+
+        let pct=0;
+        if(!unlocked[key]){
+          pct=Math.max(0,Math.min(1,metricValue(b)/b.goal));
+          span.textContent='🔒 '+Math.min(metricValue(b),b.goal)+' / '+b.goal+(b.metric==='coins'?' monete':' punti');
+        }else if(active){
+          pct=Math.max(0,Math.min(1,activeTimers[key]/b.duration));
+          span.textContent='ATTIVO · '+activeTimers[key].toFixed(1)+'s';
+        }else if(charging){
+          pct=1-Math.max(0,Math.min(1,rechargeTimers[key]/b.recharge));
+          span.textContent='RICARICA · '+Math.round(pct*100)+'%';
+        }else{
+          pct=1;
+          span.textContent='▶ ['+b.key+'] ATTIVA';
+        }
+        fill.style.width=(pct*100).toFixed(1)+'%';
       }
+
       const nextKey=boostOrder.find(k=>!unlocked[k]);
-      if(!nextKey){boostNextEl.textContent='Tutti i boost sbloccati';boostGoalEl.textContent='Scegli tu quando usarli';boostFillEl.style.width='100%'}
+      if(!nextKey){boostNextEl.textContent='Boost riutilizzabili';boostGoalEl.textContent='Attivali con i tasti 1–5';boostFillEl.style.width='100%'}
       else{
         const b=BOOSTS[nextKey],v=metricValue(b);
         boostNextEl.textContent='Prossimo boost: '+b.name;
@@ -288,19 +304,31 @@
         const pct=Math.max(...activeKeys.map(k=>activeTimers[k]/BOOSTS[k].duration));
         boostTimerFill.style.width=(Math.max(0,Math.min(1,pct))*100).toFixed(1)+'%';
       }else boostTimer.classList.remove('show');
+
       shootBtn.disabled=state!=='playing'||!isBoostActive('zero');
-      shootBtn.textContent=isBoostActive('zero')?'⚽ TIRA (A)':'⚽ TIRA (A)';
       updateLevelHud();
     }
 
+    function renderToast(title,text){
+      boostToastTitle.textContent=title;
+      boostToastText.textContent=text;
+      boostToast.classList.add('show');
+      toastTimer=2.6;
+    }
     function showBoostToast(title,text){
-      boostToastTitle.textContent=title;boostToastText.textContent=text;boostToast.classList.add('show');toastTimer=2.2;
+      if(toastTimer>0){toastQueue.push({title,text});return}
+      renderToast(title,text);
+    }
+    function boostReadyMessage(key){
+      const b=BOOSTS[key];
+      showBoostToast('BOOST DISPONIBILE — ['+b.key+'] '+b.name.toUpperCase(),key==='zero'?'Premi 5 per attivarlo. Poi usa A per tirare.':'Premi '+b.key+' per attivarlo oppure tocca il boost.');
     }
     function activateBoost(key){
-      if(state!=='playing'||!unlocked[key]||used[key]||isBoostActive(key))return;
-      used[key]=true;activeTimers[key]=BOOSTS[key].duration;
-      showBoostToast('BOOST ATTIVATO: '+BOOSTS[key].name,BOOSTS[key].desc);
-      burst(player.x+player.w*.55,player.y+player.h*.4,'#ffe27f',20);tone(980,.12,.04,'sine');setTimeout(()=>tone(1240,.12,.03,'sine'),90);
+      if(state!=='playing'||!isBoostReady(key))return;
+      activeTimers[key]=BOOSTS[key].duration;
+      showBoostToast('BOOST ATTIVATO — ['+BOOSTS[key].key+'] '+BOOSTS[key].name,BOOSTS[key].desc);
+      burst(player.x+player.w*.55,player.y+player.h*.4,'#ffe27f',20);
+      tone(980,.12,.04,'sine');setTimeout(()=>tone(1240,.12,.03,'sine'),90);
       hud();
     }
     function checkBoostUnlocks(){
@@ -308,7 +336,8 @@
         const b=BOOSTS[key];
         if(!unlocked[key]&&metricValue(b)>=b.goal){
           unlocked[key]=true;
-          showBoostToast('SBLOCCATO: '+b.name,'Tocca il boost quando vuoi usarlo.');
+          rechargeTimers[key]=0;
+          boostReadyMessage(key);
           tone(980,.10,.03,'sine');
         }
       }
@@ -317,7 +346,7 @@
     function reset(){
       runTime=0;score=0;coinCount=0;lives=3;scroll=0;enemyTimer=1.75;coinTimer=.95;safeTimer=2.0;patternStreak=0;
       enemies=[];coins=[];particles=[];
-      activeTimers={shield:0,magnet:0,eagle:0,fury:0,zero:0};used={shield:false,magnet:false,eagle:false,fury:false,zero:false};toastTimer=0;unlocked={shield:false,magnet:false,eagle:false,fury:false,zero:false};balls=[];shootCooldown=0;lastDifficultyIndex=0;boostToast.classList.remove('show');boostTimer.classList.remove('show');
+      activeTimers={shield:0,magnet:0,eagle:0,fury:0,zero:0};rechargeTimers={shield:0,magnet:0,eagle:0,fury:0,zero:0};toastTimer=0;toastQueue=[];unlocked={shield:false,magnet:false,eagle:false,fury:false,zero:false};balls=[];shootCooldown=0;lastDifficultyIndex=0;boostToast.classList.remove('show');boostTimer.classList.remove('show');
       player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true;player.invuln=0;player.frameClock=0;player.prevBottom=player.y+player.h;
       hud();
     }
@@ -415,11 +444,27 @@
     function update(dt){
       if(state!=='playing')return;
       runTime+=dt;
-      if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)boostToast.classList.remove('show')}
+      if(toastTimer>0){
+        toastTimer-=dt;
+        if(toastTimer<=0){
+          if(toastQueue.length){const n=toastQueue.shift();renderToast(n.title,n.text)}
+          else boostToast.classList.remove('show');
+        }
+      }
       for(const key of boostOrder){
         if(activeTimers[key]>0){
           activeTimers[key]=Math.max(0,activeTimers[key]-dt);
-          if(activeTimers[key]===0)showBoostToast(BOOSTS[key].name+' terminato','Gli altri boost attivi continuano normalmente.');
+          if(activeTimers[key]===0){
+            rechargeTimers[key]=BOOSTS[key].recharge;
+            showBoostToast(BOOSTS[key].name+' terminato','Ricarica avviata.');
+          }
+        }else if(unlocked[key]&&rechargeTimers[key]>0){
+          const before=rechargeTimers[key];
+          rechargeTimers[key]=Math.max(0,rechargeTimers[key]-dt);
+          if(before>0&&rechargeTimers[key]===0){
+            boostReadyMessage(key);
+            tone(760,.08,.025,'sine');
+          }
         }
       }
       const ws=speed();
@@ -626,6 +671,10 @@
 
     function keydown(e){
       if((e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW')&&!e.repeat){e.preventDefault();jump()}
+      if(!e.repeat){
+        const boostKeyMap={Digit1:'shield',Digit2:'magnet',Digit3:'eagle',Digit4:'fury',Digit5:'zero',Numpad1:'shield',Numpad2:'magnet',Numpad3:'eagle',Numpad4:'fury',Numpad5:'zero'};
+        if(boostKeyMap[e.code]){e.preventDefault();activateBoost(boostKeyMap[e.code])}
+      }
       if(e.code==='KeyA'&&!e.repeat){e.preventDefault();shootBall()}
       if(e.code==='KeyP'&&!e.repeat){e.preventDefault();togglePause()}
     }
