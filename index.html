@@ -163,8 +163,8 @@
 
     const W=1280,H=720,GROUND=594;
     const START_SPEED=235;
-    const MAX_SPEED=365;
-    const ACCEL_PER_SEC=2.05;
+    const MAX_SPEED=420;
+    const ACCEL_PER_SEC=1.75;
     const GRAVITY=2250;
     const JUMP_V=-930;
     const DOUBLE_JUMP_V=-810;
@@ -178,6 +178,8 @@
     let scroll=0;
     let enemyTimer=1.75;
     let coinTimer=.95;
+    let safeTimer=2.0;
+    let patternStreak=0;
     let enemies=[];
     let coins=[];
     let particles=[];
@@ -193,11 +195,11 @@
     };
     const boostOrder=['shield','magnet','eagle','fury'];
     const LEVELS=[
-      {name:'Ingresso a Formello',goal:800},
-      {name:'Campo Centrale',goal:1800},
-      {name:'Assedio Biancoceleste',goal:3200},
-      {name:'Corsa Capitolina',goal:5000},
-      {name:'Ultima Resistenza',goal:7500}
+      {name:'Ingresso a Formello',goal:900,speedBonus:0,spawnBase:1.62,minGap:.98,pair:.06,triple:0,sizeMin:.97,sizeMax:1.03,desc:'Prendi il ritmo: nemici singoli e finestre di salto ampie.'},
+      {name:'Campo Centrale',goal:2200,speedBonus:12,spawnBase:1.45,minGap:.84,pair:.30,triple:.03,sizeMin:.94,sizeMax:1.07,desc:'Entrano le coppie: devi preparare il secondo salto prima di atterrare.'},
+      {name:'Assedio Biancoceleste',goal:4000,speedBonus:25,spawnBase:1.29,minGap:.72,pair:.44,triple:.14,sizeMin:.90,sizeMax:1.11,desc:'Sequenze miste e altezze variabili: il doppio salto diventa decisivo.'},
+      {name:'Corsa Capitolina',goal:6500,speedBonus:38,spawnBase:1.15,minGap:.62,pair:.54,triple:.27,sizeMin:.88,sizeMax:1.14,desc:'Ondate ravvicinate: alterna salto, doppio salto e boost con precisione.'},
+      {name:'Ultima Resistenza',goal:9500,speedBonus:52,spawnBase:1.04,minGap:.54,pair:.60,triple:.40,sizeMin:.86,sizeMax:1.17,desc:'Gauntlet finale: velocità alta, triple sequenze e pochissimo margine.'}
     ];
     let currentLevel=0;
     let activeTimers={shield:0,magnet:0,eagle:0,fury:0};
@@ -208,7 +210,7 @@
     const player={x:165,y:0,w:126,h:170,vy:0,grounded:true,doubleJump:true,invuln:0,frameClock:0,prevBottom:0};
     player.y=GROUND-player.h;
 
-    function speed(){return Math.min(MAX_SPEED,START_SPEED+runTime*ACCEL_PER_SEC+currentLevel*8)}
+    function speed(){return Math.min(MAX_SPEED,START_SPEED+runTime*ACCEL_PER_SEC+LEVELS[currentLevel].speedBonus)}
     function speedRatio(){return speed()/START_SPEED}
     function hud(){
       scoreEl.textContent=score;
@@ -224,7 +226,8 @@
       const lev=LEVELS[currentLevel]||LEVELS[LEVELS.length-1];
       const prev=currentLevel===0?0:LEVELS[currentLevel-1].goal;
       const span=Math.max(1,lev.goal-prev),done=Math.max(0,Math.min(span,score-prev));
-      levelLabel.textContent='Livello '+(currentLevel+1)+' / '+LEVELS.length+' — '+lev.name;
+      const diff=['FACILE','MEDIO','IMPEGNATIVO','DIFFICILE','FINALE'];
+      levelLabel.textContent='Livello '+(currentLevel+1)+' / '+LEVELS.length+' — '+lev.name+' · '+diff[currentLevel];
       levelGoal.textContent=Math.min(score,lev.goal)+' / '+lev.goal+' punti';
       levelFill.style.width=(done/span*100).toFixed(1)+'%';
     }
@@ -280,7 +283,7 @@
     }
 
     function reset(){
-      runTime=0;score=0;coinCount=0;lives=3;scroll=0;enemyTimer=1.75;coinTimer=.95;
+      runTime=0;score=0;coinCount=0;lives=3;scroll=0;enemyTimer=1.75;coinTimer=.95;safeTimer=2.0;patternStreak=0;
       enemies=[];coins=[];particles=[];
       currentLevel=0;activeTimers={shield:0,magnet:0,eagle:0,fury:0};used={shield:false,magnet:false,eagle:false,fury:false};toastTimer=0;unlocked={shield:false,magnet:false,eagle:false,fury:false};boostToast.classList.remove('show');boostTimer.classList.remove('show');
       player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true;player.invuln=0;player.frameClock=0;player.prevBottom=player.y+player.h;
@@ -311,13 +314,13 @@
       if(currentLevel>=LEVELS.length-1){winGame();return}
       state='levelcomplete';pauseBtn.disabled=true;
       overlayTitle.textContent='Livello '+(currentLevel+1)+' completato!';
-      overlayText.textContent='Hai superato '+LEVELS[currentLevel].name+'. Punteggio: '+score+'. I boost attivi restano congelati durante la pausa.';
+      overlayText.textContent='Hai superato '+LEVELS[currentLevel].name+'. Punteggio: '+score+'. Prossima sfida: '+LEVELS[currentLevel+1].desc+' I boost attivi restano congelati durante la pausa.';
       startBtn.textContent='Continua';
       overlay.classList.remove('hidden');
     }
     function nextLevel(){
-      currentLevel++;enemies=[];coins=[];enemyTimer=1.15;coinTimer=.75;
-      state='playing';pauseBtn.disabled=false;pauseBtn.textContent='Pausa';overlay.classList.add('hidden');last=performance.now();hud();
+      currentLevel++;enemies=[];coins=[];enemyTimer=.85;coinTimer=.55;safeTimer=2.4;patternStreak=0;
+      state='playing';pauseBtn.disabled=false;pauseBtn.textContent='Pausa';overlay.classList.add('hidden');last=performance.now();showBoostToast('LIVELLO '+(currentLevel+1)+': '+LEVELS[currentLevel].name,LEVELS[currentLevel].desc);hud();
     }
     function winGame(){
       state='victory';pauseBtn.disabled=true;
@@ -362,14 +365,35 @@
     }
     function toggleSound(){audioEnabled=!audioEnabled;soundBtn.textContent=audioEnabled?'🔊':'🔇';if(audioEnabled)ensureAudio()}
 
-    function spawnEnemy(){
+    function spawnEnemy(xOffset=0,scale=1){
       const type=Math.floor(Math.random()*3);
-      const dims=type===0?[152,142]:type===1?[142,150]:[150,148];
-      enemies.push({x:W+70+Math.random()*110,y:GROUND-dims[1],w:dims[0],h:dims[1],type,dead:false,bob:Math.random()*6.28});
+      const base=type===0?[152,142]:type===1?[142,150]:[150,148];
+      const w=base[0]*scale,h=base[1]*scale;
+      enemies.push({x:W+70+xOffset,y:GROUND-h,w,h,type,dead:false,bob:Math.random()*6.28});
+    }
+    function spawnEnemyPattern(){
+      const cfg=LEVELS[currentLevel];
+      const size=()=>cfg.sizeMin+Math.random()*(cfg.sizeMax-cfg.sizeMin);
+      const roll=Math.random();
+      let count=1;
+      if(roll<cfg.triple)count=3;
+      else if(roll<cfg.triple+cfg.pair)count=2;
+
+      // Readable spacing: later levels compress the same patterns rather than spawning unfair overlaps.
+      const baseSpacing=currentLevel===0?290:currentLevel===1?260:currentLevel===2?232:currentLevel===3?210:194;
+      const jitter=()=>Math.random()*22-11;
+      for(let i=0;i<count;i++){
+        let scale=size();
+        // From level 3 onward, some waves alternate short/tall silhouettes to change jump timing.
+        if(currentLevel>=2&&count>1) scale*=i%2===0?.93:1.08;
+        spawnEnemy(i*(baseSpacing+jitter()),scale);
+      }
+      patternStreak++;
     }
     function spawnCoinPattern(){
-      const n=3+Math.floor(Math.random()*4),baseY=GROUND-(150+Math.random()*190),startX=W+75;
-      for(let i=0;i<n;i++)coins.push({x:startX+i*66,y:baseY+Math.sin(i*.85)*25,r:25,spin:Math.random()*6.28,active:true});
+      const n=3+Math.floor(Math.random()*(4+Math.min(2,currentLevel))),baseY=GROUND-(145+Math.random()*(175+currentLevel*18)),startX=W+75;
+      const amp=22+currentLevel*7;
+      for(let i=0;i<n;i++)coins.push({x:startX+i*(66-currentLevel*2),y:baseY+Math.sin(i*.85)*amp,r:25,spin:Math.random()*6.28,active:true});
     }
     function burst(x,y,color,n=10){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*240,vy:-Math.random()*240,life:.7,max:.7,size:4+Math.random()*5,color})}
     function overlap(a,b){return {x:Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x),y:Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)}}
@@ -402,9 +426,16 @@
         if(player.y>=GROUND-player.h){player.y=GROUND-player.h;player.vy=0;player.grounded=true;player.doubleJump=true}
       }
 
-      enemyTimer-=dt;coinTimer-=dt;
-      if(enemyTimer<=0){spawnEnemy();enemyTimer=Math.max(.72,1.56-runTime*.0065-currentLevel*.08)+Math.random()*.34}
-      if(coinTimer<=0){spawnCoinPattern();coinTimer=1.05+Math.random()*.9}
+      enemyTimer-=dt;coinTimer-=dt;safeTimer=Math.max(0,safeTimer-dt);
+      if(enemyTimer<=0&&safeTimer<=0){
+        spawnEnemyPattern();
+        const cfg=LEVELS[currentLevel];
+        enemyTimer=Math.max(cfg.minGap,cfg.spawnBase-runTime*.0028)+Math.random()*.22;
+        // Classic platform pacing: after several tests, grant a short recovery beat before the next challenge.
+        const restEvery=currentLevel<2?4:5;
+        if(patternStreak>=restEvery){patternStreak=0;enemyTimer+=Math.max(.42,.92-currentLevel*.10)}
+      }
+      if(coinTimer<=0){spawnCoinPattern();coinTimer=Math.max(.70,1.12-currentLevel*.06)+Math.random()*.70}
 
       for(const e of enemies){e.x-=ws*dt;e.bob+=dt*7}
       for(const c of coins){
