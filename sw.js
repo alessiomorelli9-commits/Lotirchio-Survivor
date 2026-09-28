@@ -1,4 +1,4 @@
-const CACHE='lotirchio-survivor-v7-reusable-boosts';
+const CACHE='lotirchio-survivor-v8-mobile-fullscreen';
 const LOCAL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./hero-run-1.png','./hero-run-2.png','./hero-run-3.png','./hero-run-4.png','./villain-1.png','./villain-2.png','./villain-3.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(LOCAL).catch(()=>{})))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
