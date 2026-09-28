@@ -44,6 +44,9 @@
     .primary{background:linear-gradient(#ffe27f,#f2c84b);color:#29200a}
     .secondary{background:#1a2b40;color:#fff;border:1px solid #35506b}
     .install-app{background:linear-gradient(#8fe3b7,#55d89c);color:#082317;border:0}
+    .install-fab{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(84px,calc(env(safe-area-inset-bottom) + 84px));z-index:115;min-height:44px;padding:0 14px;border-radius:999px;background:linear-gradient(#8fe3b7,#55d89c);color:#082317;font-size:13px;font-weight:900;box-shadow:0 10px 28px rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.22)}
+    .install-fab[hidden]{display:none!important}
+    body.immersive .install-fab{right:max(10px,env(safe-area-inset-right));bottom:max(78px,calc(env(safe-area-inset-bottom) + 78px));font-size:12px;min-height:40px}
     .install-app[hidden]{display:none!important}
     .install-sheet{position:fixed;inset:0;z-index:120;display:none;align-items:flex-end;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:rgba(3,8,15,.74);backdrop-filter:blur(8px)}
     .install-sheet.show{display:flex}
@@ -186,6 +189,7 @@
     <div class="tips">Modalità Survivor continua: la difficoltà sale da FACILE a ESTREMO. I boost sono riutilizzabili, cumulabili e si ricaricano dopo l’uso. Tastiera: 1–5 per attivarli; A / ⚽ TIRA con Parametro Zero.</div>
     <div class="photo-credit">Sfondo fotografico: Training Center di Formello. Fonte fotografica esterna indicata nei crediti del progetto.</div>
   </main>
+  <button class="install-fab" id="installFab">⬇ INSTALLA APP</button>
   <div class="rotate-hint" id="rotateHint"><div><b>↻ Ruota il telefono</b><span>Senato Survivor è ottimizzato per giocare a schermo intero in orizzontale.</span><div style="margin-top:16px"><button class="install-app" data-install hidden>⬇ Installa app</button></div></div></div>
   <div class="install-sheet" id="installSheet" aria-hidden="true">
     <div class="install-card">
@@ -223,6 +227,7 @@
     const soundBtn=document.getElementById('soundBtn');
     const fullscreenBtn=document.getElementById('fullscreenBtn');
     const installButtons=[...document.querySelectorAll('[data-install]')];
+    const installFab=document.getElementById('installFab');
     const installSheet=document.getElementById('installSheet');
     const installTitle=document.getElementById('installTitle');
     const installIntro=document.getElementById('installIntro');
@@ -520,7 +525,8 @@
       const installed=isStandaloneApp();
       const ios=isIOSDevice();
       const mobile=isMobileLike();
-      for(const btn of installButtons) btn.hidden=installed||(!mobile&&!deferredInstallPrompt);
+      for(const btn of installButtons) btn.hidden=installed||(!ios&&!mobile&&!deferredInstallPrompt);
+      installFab.hidden=installed||(!ios&&!mobile&&!deferredInstallPrompt);
     }
     function showInstallGuide(kind){
       installSteps.innerHTML='';
@@ -825,6 +831,7 @@
     pauseBtn.addEventListener('click',togglePause);
     fullscreenBtn.addEventListener('click',toggleFullscreen);
     installButtons.forEach(btn=>btn.addEventListener('click',installApp));
+    installFab.addEventListener('click',installApp);
     installCloseBtn.addEventListener('click',hideInstallGuide);
     installSheet.addEventListener('click',e=>{if(e.target===installSheet)hideInstallGuide()});
     window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;updateInstallUI()});
@@ -842,7 +849,9 @@
 
     Promise.all([...heroFrames,...villainImgs].map(i=>i.decode?.().catch(()=>{})||Promise.resolve())).then(render);
     bgPhoto.addEventListener('load',render);bgPhoto.addEventListener('error',render);
-    syncImmersive();updateInstallUI();hud();render();requestAnimationFrame(loop);
+    syncImmersive();updateInstallUI();
+    if(isIOSDevice()&&!isStandaloneApp()) installFab.hidden=false;
+    hud();render();requestAnimationFrame(loop);
 
     if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   })();
